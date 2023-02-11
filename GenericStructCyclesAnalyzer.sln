@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericStructCyclesAnalyzer", "GenericStructCyclesAnalyzer\GenericStructCyclesAnalyzer.csproj", "{E18285AF-B67A-4F9A-A723-60983CBB7B24}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAssembly", "TestAssembly\TestAssembly.csproj", "{EA844A23-6097-466D-BB5A-0EA468F44742}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E18285AF-B67A-4F9A-A723-60983CBB7B24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E18285AF-B67A-4F9A-A723-60983CBB7B24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E18285AF-B67A-4F9A-A723-60983CBB7B24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E18285AF-B67A-4F9A-A723-60983CBB7B24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA844A23-6097-466D-BB5A-0EA468F44742}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA844A23-6097-466D-BB5A-0EA468F44742}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA844A23-6097-466D-BB5A-0EA468F44742}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA844A23-6097-466D-BB5A-0EA468F44742}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {556C23CC-817C-4E6E-84E5-91871A6FA04B}
+	EndGlobalSection
+EndGlobal

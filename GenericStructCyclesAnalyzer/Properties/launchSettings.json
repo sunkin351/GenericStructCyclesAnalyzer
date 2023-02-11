@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "GenericStructCyclesAnalyzer": {
+      "commandName": "Project"
+    },
+    "Debug Analyzer": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\TestAssembly\\TestAssembly.csproj"
+    }
+  }
+}
