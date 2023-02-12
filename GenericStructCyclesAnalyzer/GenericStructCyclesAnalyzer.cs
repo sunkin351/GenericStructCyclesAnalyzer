@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace GenericStructCyclesAnalyzer;
 
-[DiagnosticAnalyzer(LanguageNames.CSharp)]
+[DiagnosticAnalyzer(LanguageNames.CSharp, LanguageNames.VisualBasic)]
 public class GenericStructCyclesAnalyzer : DiagnosticAnalyzer
 {
     private static readonly DiagnosticDescriptor _descriptor = new(
@@ -69,7 +69,9 @@ public class GenericStructCyclesAnalyzer : DiagnosticAnalyzer
         if (!checkedType.IsValueType)
             return false;
 
-        if (SymbolEqualityComparer.Default.Equals(targetType, checkedType.OriginalDefinition))
+        var originalDef = checkedType.OriginalDefinition;
+
+        if (SymbolEqualityComparer.Default.Equals(targetType, originalDef))
             return true;
         
         if (checkedType is INamedTypeSymbol namedCheckedType)
@@ -85,11 +87,9 @@ public class GenericStructCyclesAnalyzer : DiagnosticAnalyzer
             }
         }
 
-        checkedType = checkedType.OriginalDefinition;
-
-        if (set.Add(checkedType))
+        if (set.Add(originalDef))
         {
-            foreach (var field in checkedType.GetMembers().OfType<IFieldSymbol>())
+            foreach (var field in originalDef.GetMembers().OfType<IFieldSymbol>())
             {
                 cancel.ThrowIfCancellationRequested();
 
