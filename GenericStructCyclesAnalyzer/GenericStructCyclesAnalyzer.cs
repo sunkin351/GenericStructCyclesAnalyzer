@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 
 using Microsoft.CodeAnalysis;
@@ -12,14 +13,12 @@ public class GenericStructCyclesAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor _descriptor = new(
         "GSC0",
         "Generic Struct Cycle Dependency",
-        "The Type declaration of Field or Auto-Property `{0}.{1}` would cause a TypeLoadException at runtime!",
+        "Struct Member '{0}' of Type '{1}' causes a cycle in the struct layout (according to the runtime)",
         "",
         DiagnosticSeverity.Error,
         true,
+        "Catches a few cases where the compiler doesn't error on a field or auto-property declaration that would cause a TypeLoadException at runtime.",
         null,
-        """
-        Catches a few cases where the compiler doesn't error on a field or auto-property declaration that would cause a TypeLoadException at runtime.
-        """,
         WellKnownDiagnosticTags.NotConfigurable
     );
 
@@ -37,29 +36,25 @@ public class GenericStructCyclesAnalyzer : DiagnosticAnalyzer
 
     private static void SymbolAction(SymbolAnalysisContext ctx)
     {
-        IFieldSymbol field = (IFieldSymbol)ctx.Symbol;
+        var field = (IFieldSymbol)ctx.Symbol;
 
         var parentType = field.ContainingType;
 
-        if (!parentType.IsValueType)
+        if (field.IsStatic || !parentType.IsValueType)
         {
             return;
         }
 
-        // Compiler already detects this for non-generic types
-        if (field.Type is not INamedTypeSymbol { TypeParameters.Length: > 0 } fieldType)
-        {
-            return;
-        }
-
-        if (IsOrContainsGenericStructCycle(parentType, fieldType.TypeArguments, ctx.CancellationToken))
+        var set = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+        
+        if (IsOrContainsGenericStructCycle(parentType, field.Type, set, ctx.CancellationToken))
         {
             ctx.ReportDiagnostic(
                 Diagnostic.Create(
                     _descriptor,
                     field.Locations[0],
-                    field.Name,
-                    (field.AssociatedSymbol ?? field).Name
+                    (field.AssociatedSymbol ?? field).ToDisplayString(),
+                    field.Type.ToDisplayString()
                 )
             );
         }
@@ -67,34 +62,40 @@ public class GenericStructCyclesAnalyzer : DiagnosticAnalyzer
 
     private static bool IsOrContainsGenericStructCycle(
         INamedTypeSymbol targetType,
-        ImmutableArray<ITypeSymbol> arguments,
+        ITypeSymbol checkedType,
+        HashSet<ITypeSymbol> set,
         CancellationToken cancel)
     {
-        foreach (var type in arguments)
+        if (!checkedType.IsValueType)
+            return false;
+
+        if (SymbolEqualityComparer.Default.Equals(targetType, checkedType.OriginalDefinition))
+            return true;
+        
+        if (checkedType is INamedTypeSymbol namedCheckedType)
         {
-            cancel.ThrowIfCancellationRequested();
-
-            if (type is ITypeParameterSymbol || !type.IsValueType)
-                continue;
-
-            // Probably doesn't cover all cases, advice wanted
-            if (SymbolEqualityComparer.Default.Equals(targetType, type.OriginalDefinition)
-                || (type is INamedTypeSymbol namedSymbol && IsOrContainsGenericStructCycle(targetType, namedSymbol.TypeArguments, cancel)))
+            foreach (var type in namedCheckedType.TypeArguments)
             {
-                return true;
-            }
+                cancel.ThrowIfCancellationRequested();
 
-            // Compiler does not detect this.
-            // This might cover more cases than desired.
-            // Advice wanted.
-            foreach (var member in type.GetMembers())
-            {
-                if (member is IFieldSymbol field)
+                if (IsOrContainsGenericStructCycle(targetType, type, set, cancel))
                 {
-                    if (SymbolEqualityComparer.Default.Equals(targetType, field.Type.OriginalDefinition))
-                    {
-                        return true;
-                    }
+                    return true;
+                }
+            }
+        }
+
+        checkedType = checkedType.OriginalDefinition;
+
+        if (set.Add(checkedType))
+        {
+            foreach (var field in checkedType.GetMembers().OfType<IFieldSymbol>())
+            {
+                cancel.ThrowIfCancellationRequested();
+
+                if (!field.IsStatic && IsOrContainsGenericStructCycle(targetType, field.Type, set, cancel))
+                {
+                    return true;
                 }
             }
         }
