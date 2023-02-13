@@ -4,20 +4,20 @@
     <TargetFramework>netstandard2.0</TargetFramework>
 	<LangVersion>11.0</LangVersion>
 	<IsRoslynComponent>true</IsRoslynComponent>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<RepositoryUrl>https://github.com/sunkin351/GenericStructCyclesAnalyzer</RepositoryUrl>
-	<PackageTags></PackageTags>
-	<Description>Generates compile error messages for cases where the compiler misses circumstances that the runtime would consider a struct layout cycle</Description>
-	<PackageLicenseExpression>MIT-0</PackageLicenseExpression>
-	<Title>Generic Struct Cycles Analyzer</Title>
-	<Authors>Sunkin351</Authors>
+	<IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <PropertyGroup>
+	  <RepositoryUrl>https://github.com/sunkin351/GenericStructCyclesAnalyzer</RepositoryUrl>
+	  <Description>Generates compile error messages for cases where the compiler misses circumstances that the runtime would consider a struct layout cycle</Description>
+	  <PackageLicenseExpression>MIT-0</PackageLicenseExpression>
+	  <Title>Generic Struct Cycles Analyzer</Title>
+	  <Authors>Sunkin351</Authors>
+	  <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+	<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
   </ItemGroup>
 
   <ItemGroup>
